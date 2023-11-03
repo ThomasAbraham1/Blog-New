@@ -1,0 +1,50 @@
+<%- include("partials/header"); -%>
+  <main class="main">
+    <div class="main-content responsive-wrapper">
+      <article class="widget">
+        <h1>Compose your post</h1>
+        <form id="postForm" action="/" method="post">
+          <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Title</label>
+            <input type="text" name="postTitle" class="form-control" id="exampleFormControlInput1"
+              placeholder="eg: How is AI stealing jobs" value="" required>
+          </div>
+          <div class="mb-3">
+            <label for="textarea1" class="form-label">Content</label>
+            <textarea class="form-control" name="postContent" id="textarea1" rows="3" minlength="2"
+              placeholder="eg: I was walking one day and I saw this..." value="" required></textarea>
+          </div>
+          <div class="col-12">
+            <button id="postFormBtn" class="btn btn-secondary" type="submit">Post</button>
+          </div>
+        </form>
+      </article>
+    </div>
+  </main>
+
+  <script>
+    var title = document.querySelector("#exampleFormControlInput1");
+    var textArea = document.querySelector('#textarea1');
+    var formBtn = document.querySelector('#postFormBtn');
+    var isTitleClicked = false;
+    // Checking if the title input field is clicked
+    title.addEventListener('click', function (e) {
+      isTitleClicked = true;
+      console.log(isTitleClicked);
+    });
+    //Checking if 'Enter' key is pressed in the content field
+    textArea.addEventListener('keydown', function (e) {
+      var pressedKey = e.key;
+      console.log(pressedKey);
+      textArea.addEventListener('keydown', function (e) {
+        var pressedKey = e.key;
+        if (!e.shiftKey && pressedKey === 'Enter') {
+          e.preventDefault();
+          formBtn.click(); 3
+        }
+      });
+    });
+
+  </script>
+
+  <%- include("partials/footer"); -%>

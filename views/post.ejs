@@ -1,0 +1,14 @@
+<%- include("partials/header"); -%>
+  <main class="main">
+    <button onclick="document.location='/compose'" class="sticky-button">Compose</button>
+    <div class="main-content responsive-wrapper">
+      <article class="widget">
+        <h1><%= postTitle %></h1>
+        <p class="post-content">
+          <%= postContent %>
+        </p>
+      </article>
+    </div>
+  </main>
+
+  <%- include("partials/footer"); -%>
