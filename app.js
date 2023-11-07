@@ -121,12 +121,21 @@ app.post('/', function (req, res) {
   });
 });
 
-app.post('/userUpdation', (req, res) => {
-  User.findOneAndUpdate({ _id: req.user._id }, { username: req.body.userName }, { new: true }).then((resultRecord) => {
-    console.log('Updated userName of the new user \n' + resultRecord);
-    req.session.passport.user.username = req.body.userName;
-    res.redirect('/');
-  });
+app.post('/userUpdation/:operation', (req, res) => {
+  console.log(req.body);
+  var operation = req.params.operation;
+  if (operation == 'updateUserName') {
+    User.findOneAndUpdate({ _id: req.user._id }, { username: req.body.userName }, { new: true }).then((resultRecord) => {
+      console.log('Updated userName of the new user \n' + resultRecord);
+      req.session.passport.user.username = req.body.userName;
+      res.redirect('/');
+    });
+  } else if (operation == 'deletePost') {
+    User.findOneAndUpdate({ _id: req.user._id }, { $pull: { posts: { _id: req.body.postId } } }).then( ()=>{
+      res.redirect("/");
+    } );
+
+  }
 });
 
 app.get('/compose', function (req, res) {
@@ -136,7 +145,7 @@ app.get('/compose', function (req, res) {
 
 app.get("/posts/:post", function (req, res) {
   var postTitle = req.params.post;
-  User.findOne({_id: req.user._id}, {posts: {$elemMatch: {postTitle: postTitle}}}).then(function (post) {
+  User.findOne({ _id: req.user._id }, { posts: { $elemMatch: { postTitle: postTitle } } }).then(function (post) {
     // console.log(post);
     res.render('post.ejs', { postTitle: post.posts[0].postTitle, postContent: post.posts[0].postContent });
   });

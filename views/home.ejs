@@ -16,7 +16,7 @@
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLongTitle">What do we call you?</h5>
         </div>
-        <form action="/userUpdation" method="post">
+        <form action="/userUpdation/updateUserName" method="post">
           <div class="modal-body">
             <input type="text" class="form-control" name="userName" placeholder="Your Name ( A-Z / a-z )"
               pattern="[/^[A-Za-z]+$/]" minlength="3" maxlength="24" required>
@@ -51,8 +51,11 @@
                 </p>
                 <% }%>
                   <div class="delete-btn">
-                    <a href="/delete"><i class="fa-solid fa-trash" src="../public/images/delete-icon.svg"
-                        style="color: #230303; float: right;"></i></a>
+                    <form action="/userUpdation/deletePost" method="post">
+                      <a href="#" onclick="this.parentNode.submit();"><i class="fa-solid fa-trash" src="../public/images/delete-icon.svg"
+                          style="color: #230303; float: right;"></i></a>
+                      <input type="text" value='<%=post._id %>' name="postId" hidden>
+                    </form>
                   </div>
           </article>
           <% }); }%>
