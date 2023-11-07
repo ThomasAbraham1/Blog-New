@@ -1,59 +1,76 @@
 <%- include("partials/header"); -%>
+
+  <h1 style="font-size: 140%; text-align: center; padding-top: 2rem;">
+    <% if(typeof(userName)=='undefined' ){ %>
+      Welcome to your personal blog! <%= typeof(userName) %>
+        <% } else{ %>
+          Welcome, <%= userName %>!
+            <% } %>
+  </h1>
+
   <!-- Modal -->
   <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+          <h5 class="modal-title" id="exampleModalLongTitle">What do we call you?</h5>
         </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+        <form action="/userUpdation" method="post">
+          <div class="modal-body">
+            <input type="text" class="form-control" name="userName" placeholder="Your Name ( A-Z / a-z )"
+              pattern="[/^[A-Za-z]+$/]" minlength="3" maxlength="24" required>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-dark">Save changes</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
 
+
   <main class="main">
     <button onclick="document.location='/compose'" class="sticky-button">Compose</button>
     <div class="main-content responsive-wrapper">
-      <% posts.forEach(post=> { %>
-        <article class="widget">
-          <h1>
-            <%= post.postTitle %>
-          </h1>
-          <% if((post.postContent).length> 200) { %>
-            <p class="post-content">
-              <%= (post.postContent).substring(0,200) + '...' %>
-            </p>
-            <a href="/posts/<%= post.postTitle %>">Read more</a>
-            <%} else{%>
+      <% if (typeof(posts) !='undefined' ){ %>
+        <% posts.forEach(post=> { %>
+          <article class="widget">
+            <h1>
+              <%= post.postTitle %>
+            </h1>
+            <% if((post.postContent).length> 200) { %>
               <p class="post-content">
-                <%= (post.postContent) %>
+                <%= (post.postContent).substring(0,200) + '...' %>
               </p>
-              <% }%>
-        </article>
-        <% }); %>
+              <a href="/posts/<%= post.postTitle %>">Read more</a>
+              <%} else{%>
+                <p class="post-content">
+                  <%= (post.postContent) %>
+                </p>
+                <% }%>
+                  <div class="delete-btn">
+                    <a href=""><i class="fa-solid fa-trash" src="../public/images/delete-icon.svg"
+                        style="color: #230303; float: right;"></i></a>
+                  </div>
+          </article>
+          <% }); }%>
+
     </div>
   </main>
 
   <script>
-  // Function to open the modal
-  function openModal() {
-    $('#exampleModalCenter').modal({backdrop: 'static', keyboard: false},'show');
-  }
+    var isUserNameSet = JSON.parse('<%- JSON.stringify(isUserNameSet) %>');
+    function openModal() {
+      $('#exampleModalCenter').modal({ backdrop: 'static', keyboard: false }, 'show');
+    }
 
-  // Open the modal when the page loads
-  $(document).ready(function () {
-    openModal();
-  });
-</script>
+    // Open the modal when the page loads and when the userName isn't set in db
+    $(document).ready(function () {
+      if (isUserNameSet == 0) {
+        openModal();
+      }
+    });
+  </script>
   <%- include("partials/footer"); -%>

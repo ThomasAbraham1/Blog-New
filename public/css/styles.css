@@ -108,7 +108,7 @@ body {
 }
 
 .main {
-	margin-top: 3rem;
+	margin-top: 2rem;
 }
 
 .widget {
@@ -123,6 +123,7 @@ body {
 	margin-bottom: 2rem;
 	font-size: 1.125rem;
 }
+
 
 .widget>*+* {
 	margin-top: 1.25em;
