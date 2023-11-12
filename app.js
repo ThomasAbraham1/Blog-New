@@ -35,7 +35,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
-mongoose.connect("mongodb://127.0.0.1:27017/blog", { useNewUrlParser: true });
+mongoose.connect("mongodb+srv://chatgptthomas:FmU5yTOcDQt4cGnB@cluster0.vhhesfh.mongodb.net/blog", { useNewUrlParser: true });
 
 const postSchema = {
   postTitle: String,
@@ -65,7 +65,7 @@ passport.use(User.createStrategy());
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:3000/auth/google/blog",
+  callbackURL: "https://blog-fz3z.onrender.com/auth/google/blog",
   userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
   function (accessToken, refreshToken, profile, cb) {
@@ -79,7 +79,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: "http://localhost:3000/auth/facebook/blog",
+  callbackURL: "https://blog-fz3z.onrender.com/auth/facebook/blog",
   profileFields: ['id', 'displayName', 'email']
 },
   function (accessToken, refreshToken, profile, cb) {
@@ -267,7 +267,7 @@ app.post('/edit', (req,res)=>{
   });
   res.redirect('/');
 
-}); // Error persists, whenever an edit is made it replaces all the other existing posts! Pending Fix.
+}); // Error persists, whenever an edit is made it replaces all the other existing posts! Pending Fix. Fixed finally!
 
 
 
