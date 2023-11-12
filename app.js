@@ -12,6 +12,8 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const findOrCreate = require('mongoose-findorcreate');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require("passport-facebook").Strategy;
 
 const homeText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
 
@@ -20,8 +22,6 @@ app.set('view engine', 'ejs');
 app.set('trust proxy', 1);
 
 app.use(express.static('./public'));
-
-
 
 var secret = process.env.SECRET;
 app.use(session({
@@ -44,7 +44,6 @@ const postSchema = {
 
 
 const userSchema = new mongoose.Schema({
-
   username: String,
   email: String,
   provider: String,
@@ -62,6 +61,34 @@ userSchema.plugin(findOrCreate);
 const User = new mongoose.model('user', userSchema);
 
 passport.use(User.createStrategy());
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: "http://localhost:3000/auth/google/blog",
+  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
+},
+  function (accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+    User.findOrCreate({ email: profile.emails[0].value }, { OAuthId: profile.id, username: profile.name.givenName }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+passport.use(new FacebookStrategy({
+  clientID: process.env.FACEBOOK_APP_ID,
+  clientSecret: process.env.FACEBOOK_APP_SECRET,
+  callbackURL: "http://localhost:3000/auth/facebook/blog",
+  profileFields: ['id', 'displayName', 'email']
+},
+  function (accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+    User.findOrCreate({ email: profile.emails[0].value }, { OAuthId: profile.id, username: profile.displayName }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -83,22 +110,26 @@ const post = new Post({
 app.get('/', function (req, res) {
   console.log(req.isAuthenticated());
   // Selecting all the records from the database
-  User.find({ _id: req.user._id, username: { $eq: null } }, {
-    new: true
-  }).then((foundUser) => {
-    if (foundUser.length == 1) {
-      // console.log("hello");
-      User.findOne({ _id: req.user._id }).then(function (user) {
-        res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "0" });
-      });
-    } else {
-      // console.log(req.session);
-      User.findOne({ _id: req.user._id }).then(function (user) {
-        // console.log(user.posts);
-        res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "1", userName: req.user.username });
-      });
-    }
-  });
+  if (req.isAuthenticated()) {
+    User.find({ _id: req.user._id, username: { $eq: null } }, {
+      new: true
+    }).then((foundUser) => {
+      if (foundUser.length == 1) {
+        // console.log("hello");
+        User.findOne({ _id: req.user._id }).then(function (user) {
+          res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "0" });
+        });
+      } else {
+        // console.log(req.session);
+        User.findOne({ _id: req.user._id }).then(function (user) {
+          // console.log(user.posts);
+          res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "1", userName: req.user.username });
+        });
+      }
+    });
+  } else {
+    res.redirect('/register');
+  }
 });
 
 app.post('/', function (req, res) {
@@ -131,9 +162,9 @@ app.post('/userUpdation/:operation', (req, res) => {
       res.redirect('/');
     });
   } else if (operation == 'deletePost') {
-    User.findOneAndUpdate({ _id: req.user._id }, { $pull: { posts: { _id: req.body.postId } } }).then( ()=>{
+    User.findOneAndUpdate({ _id: req.user._id }, { $pull: { posts: { _id: req.body.postId } } }).then(() => {
       res.redirect("/");
-    } );
+    });
 
   }
 });
@@ -143,10 +174,11 @@ app.get('/compose', function (req, res) {
 });
 
 
+
 app.get("/posts/:post", function (req, res) {
-  var postTitle = req.params.post;
-  User.findOne({ _id: req.user._id }, { posts: { $elemMatch: { postTitle: postTitle } } }).then(function (post) {
-    // console.log(post);
+  var postId = req.params.post;
+  User.findOne({ _id: req.user._id }, { posts: { $elemMatch: { _id: postId } } }).then(function (post) {
+    console.log(post.posts);
     res.render('post.ejs', { postTitle: post.posts[0].postTitle, postContent: post.posts[0].postContent });
   });
 });
@@ -192,6 +224,52 @@ app.post('/register', (req, res) => {
   });
 
 });
+
+
+app.get('/auth/google/blog',
+  passport.authenticate('google', { failureRedirect: '/' }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'openid', 'email'] }));
+
+app.get('/auth/facebook/blog',
+  passport.authenticate('facebook', { failureRedirect: '/' }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
+app.get('/auth/facebook',
+  passport.authenticate('facebook', { scope: ['email'] }));
+
+
+// Editing the post
+
+app.get('/edit/:post', (req, res) => {
+  var postId = req.params.post;
+  // console.log(postId);
+  User.findOne({ _id: req.user._id}, { posts: { $elemMatch: { _id: postId } } }).then((foundPost) => {
+    console.log(foundPost);
+    var userIdAndPost = foundPost;
+    res.render('edit', {userIdAndPost: userIdAndPost});
+  });
+});
+
+app.post('/edit', (req,res)=>{
+  var postId = req.body.postId;
+  var postTitle = req.body.postTitle;
+  var postContent = req.body.postContent;
+
+  User.findOneAndUpdate({_id: req.user._id, "posts._id": postId}, {$set: {"posts.$.postTitle" : postTitle, "posts.$.postContent" : postContent }}, {new: true}).then( (postEdit) =>{
+    // console.log(postEdit); 
+  });
+  res.redirect('/');
+
+}); // Error persists, whenever an edit is made it replaces all the other existing posts! Pending Fix.
+
+
 
 app.listen(port, function (req, res) {
   console.log("Runnging your app on port " + port);

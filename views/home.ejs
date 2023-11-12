@@ -44,18 +44,23 @@
               <p class="post-content">
                 <%= (post.postContent).substring(0,200) + '...' %>
               </p>
-              <a href="/posts/<%= post.postTitle %>">Read more</a>
+              <a href="/posts/<%= post._id %>">Read more</a>
               <%} else{%>
                 <p class="post-content">
                   <%= (post.postContent) %>
                 </p>
                 <% }%>
-                  <div class="delete-btn">
-                    <form action="/userUpdation/deletePost" method="post">
-                      <a href="#" onclick="this.parentNode.submit();"><i class="fa-solid fa-trash" src="../public/images/delete-icon.svg"
-                          style="color: #230303; float: right;"></i></a>
-                      <input type="text" value='<%=post._id %>' name="postId" hidden>
-                    </form>
+                  <div class="btns">
+                    <div class="editBtn">
+                      <a href="/edit/<%= post._id %>">Edit</a>
+                    </div>
+                    <div class="delete-btn">
+                      <form action="/userUpdation/deletePost" method="post">
+                        <a href="#" onclick="this.parentNode.submit();"><i class="fa-solid fa-trash"
+                            src="../public/images/delete-icon.svg" style="color: #230303; float: right;"></i></a>
+                        <input type="text" value='<%=post._id %>' name="postId" hidden>
+                      </form>
+                    </div>
                   </div>
           </article>
           <% }); }%>
