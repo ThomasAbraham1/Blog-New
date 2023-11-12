@@ -9,6 +9,7 @@ const port = process.env.PORT || 3000;
 const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
 const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const findOrCreate = require('mongoose-findorcreate');
@@ -28,7 +29,10 @@ app.use(session({
   secret: secret,
   resave: false,
   saveUninitialized: true,
-  cookie: {}
+  cookie: { },
+    store: new MemoryStore({
+      // checkPeriod: 86400000 // prune expired entries every 24h
+    }),
 }));
 
 app.use(passport.initialize());
