@@ -41,7 +41,7 @@ app.use(passport.session());
 
 mongoose.connect("mongodb+srv://chatgptthomas:FmU5yTOcDQt4cGnB@cluster0.vhhesfh.mongodb.net/blog", { useNewUrlParser: true });
 
-const postSchema = {
+const postSchema = { 
   postTitle: String,
   postContent: String,
 }
@@ -112,28 +112,32 @@ const post = new Post({
 
 
 app.get('/', function (req, res) {
-  console.log(req.isAuthenticated());
-  // Selecting all the records from the database
   if (req.isAuthenticated()) {
-    User.find({ _id: req.user._id, username: { $eq: null } }, {
-      new: true
-    }).then((foundUser) => {
-      if (foundUser.length == 1) {
-        // console.log("hello");
-        User.findOne({ _id: req.user._id }).then(function (user) {
-          res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "0" });
-        });
-      } else {
-        // console.log(req.session);
-        User.findOne({ _id: req.user._id }).then(function (user) {
-          // console.log(user.posts);
-          res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "1", userName: req.user.username });
-        });
-      }
-    });
-  } else {
-    res.redirect('/register');
+    res.render('homepage');
   }
+  
+  // console.log(req.isAuthenticated());
+  // // Selecting all the records from the database
+  // if (req.isAuthenticated()) {
+  //   User.find({ _id: req.user._id, username: { $eq: null } }, {
+  //     new: true
+  //   }).then((foundUser) => {
+  //     if (foundUser.length == 1) {
+  //       // console.log("hello");
+  //       User.findOne({ _id: req.user._id }).then(function (user) {
+  //         res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "0" });
+  //       });
+  //     } else {
+  //       // console.log(req.session);
+  //       User.findOne({ _id: req.user._id }).then(function (user) {
+  //         // console.log(user.posts);
+  //         res.render('home', { homeText: homeText, posts: user.posts, isUserNameSet: "1", userName: req.user.username });
+  //       });
+  //     }
+  //   });
+  // } else {
+  //   res.redirect('/register');
+  // }
 });
 
 app.post('/', function (req, res) {
